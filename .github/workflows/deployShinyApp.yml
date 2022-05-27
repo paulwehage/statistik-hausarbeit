@@ -7,8 +7,6 @@ jobs:
     runs-on: macOS-latest
     steps:
       - uses: actions/checkout@v2
-        with:
-          path: ./hypothesentest
       - uses: r-lib/actions/setup-r@master
       - name: Install shiny
         run: |
