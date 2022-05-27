@@ -14,5 +14,5 @@ jobs:
         shell: Rscript {0}
       - name: Push to shiny.io
         run: |
-          Rscript -e "rsconnect::setAccountInfo(name='hypothesentest', token=${{secrets.SHINYAPPS_TOKEN}}, secret=${{secrets.SHINYAPPS_SECRET}})"
+          Rscript -e "rsconnect::setAccountInfo(name='hypothesentest',token='791905CC71FCE699C8D95561426FDA1A', secret='zlZZsfDpzCU3ISBKa7qo0E9DgoAPciZ0KL4Z+kG8')"
           Rscript -e "rsconnect::deployApp(appName = 'hypothesentest')" 
