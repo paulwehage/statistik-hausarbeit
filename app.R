@@ -8,6 +8,7 @@
 
 
 library(shiny)
+library(readxl)
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
@@ -28,14 +29,15 @@ ui <- fluidPage(
   sidebarPanel(
     width = 3,
     h5(strong("Mit Chlorwaschung")),
-    textInput("mortWCl", "Todesfälle der Frauen", value = "200", width = 1000, placeholder = "Todesfälle"),
+    textInput("mortWCl", "Todesfälle der Frauen", value = "300", width = 1000, placeholder = "Todesfälle"),
     textInput("stdWCl", "Standardabweichung der Todesfälle", value = "3", width = 1000, placeholder = "Standardabweichung"),
-    textInput("StichWCl", "Stichpropengröße der Patientinnen", value = "2000", width = 1000, placeholder = "Stichprobengröße"),
+    textInput("stichWCl", "Stichpropengröße der Patientinnen", value = "2000", width = 1000, placeholder = "Stichprobengröße"),
   ),
   mainPanel(align = "center",
     sliderInput("konfniv", "Konfidenzniveau", min = 0, max = 1, step = .001, value = .95),
     width = 6,
     plotOutput("distPlot"),
+    sliderInput(sep="","jahr", "Echte Fallzahlen nach Jahre", min = 1841, max = 1852, step = 1, value = 1841),
   ),
   sidebarPanel(
     width = 3,
@@ -50,7 +52,28 @@ ui <- fluidPage(
 
 
 # Define server logic required to draw a histogram
-server <- function(input, output) {
+server <- function(input, output,session) {
+  
+  #Echte Daten von Semmelweis
+  year = c(1841,1842,1843,1844,1845,1846,1847,1848,1849,1850,1851,1852,1841,1842,1843,1844,1845,1846,1847,1848,1849,1850,1851,1852)
+  birhts= c(3036,3287,3060,3157,3492,4010,3490,3556,3858,3745,4194,4471,2442,2659,2739,2956,3241,3754,3306,3219,3371,3261,3395,3360)
+  deaths= c(237,518,274,260,241,459,176,45,103,74,75,181,86,202,164,68,66,105,32,43,87,54,121,192)
+  semmelDf <- data.frame(year,birhts,deaths)
+  
+
+  getDeathsPerYear <- function(year) {
+    todeProJahr <- semmelDf[semmelDf['year']==year, , drop=FALSE]
+    return(todeProJahr)
+  }
+  
+  observeEvent(input$jahr, {
+    updateTextInput(session,'mortWCl',value = paste(getDeathsPerYear(input$jahr)[,3][1]))
+    updateTextInput(session,'mortWoCl',value = paste(getDeathsPerYear(input$jahr)[,3][2]))
+    updateTextInput(session,'stichWCl',value = paste(getDeathsPerYear(input$jahr)[,2][1]))
+    updateTextInput(session,'stichWoCl',value = paste(getDeathsPerYear(input$jahr)[,2][2]))
+    })
+  
+  print(getDeathsPerYear(1847)[,2][1])
   
   # Reactive expression to create data frame of all input values ----
   sliderValues <- reactive({
@@ -91,7 +114,6 @@ server <- function(input, output) {
     cvalue = conf_value(input$konfniv)
     abline(v=-cvalue, col="red", lwd=3)
     abline(v=cvalue, col="red", lwd=3)
-    #res = compare(input$normalW, input$selbstW, input$normalSTD**2, input$selbstSTD**2, input$normalStich, input$selbstStich)
     abline(v=z_val, lwd=3)
   })
   
@@ -103,5 +125,3 @@ server <- function(input, output) {
   })
 }
 shinyApp(ui = ui, server = server)
-
-#Dies ist ein Test
