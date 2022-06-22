@@ -9,6 +9,23 @@
 
 library(shiny)
 
+## Berechnung des Z-Werts
+#this returns a value that can then be used to determine whether we accept h0 or not
+compare = function(zv1, zv2, var1, var2, n1, n2){
+  return ((zv1-zv2)/sqrt((var1/n1)+(var2/n2)));
+}
+
+conf_value = function(conflevel){
+  return(qnorm(conflevel, 0, 1)); 
+}
+
+## Überprüfung der Null-Hypothese
+#function to determine conf.level result, i.e. 1.64 for 95%. and then return t/f depending on if it's gt/lt result from compare
+res = function(conflevel, compareValue){
+  tmp = conf_value(conflevel)
+  return(ifelse(tmp >= compareValue & -tmp <= compareValue, TRUE, FALSE));
+}
+
 # Define UI for application that draws a histogram
 ui <- fluidPage(
   
@@ -28,22 +45,24 @@ ui <- fluidPage(
   sidebarPanel(
     width = 3,
     h5(strong("Klinik 1")),
-    textInput("mortWCl", "Todesfälle der Frauen", value = "300", width = 1000, placeholder = "Todesfälle"),
-    textInput("stdWCl", "Standardabweichung der Todesfälle", value = "3", width = 1000, placeholder = "Standardabweichung"),
-    textInput("stichWCl", "Stichpropengröße der Patientinnen", value = "2000", width = 1000, placeholder = "Stichprobengröße"),
+    numericInput("mortWCl", "Todesfälle der Frauen", value = "300", width = 1000),
+    numericInput("stdWCl", "Standardabweichung der Todesfälle", value = "3", width = 1000),
+    numericInput("stichWCl", "Stichpropengröße der Patientinnen", value = "2000", width = 1000),
   ),
   mainPanel(align = "center",
     sliderInput("konfniv", "Konfidenzniveau", min = 0, max = 1, step = .001, value = .95),
+    h3(htmlOutput("t")),
     width = 6,
     plotOutput("distPlot"),
+    
     sliderInput(sep="","jahr", "Echte Fallzahlen nach Jahre", min = 1841, max = 1852, step = 1, value = 1841),
   ),
   sidebarPanel(
     width = 3,
     h5(strong("Klinik 2")),
-    textInput("mortWoCl", "Todesfälle der Frauen", value = "300", width = 1000, placeholder = "Todesfälle"),
-    textInput("stdWoCl", "Standardabweichung der Todesfälle", value = "2", width = 1000, placeholder = "Standardabweichung"),
-    textInput("stichWoCl", "Stichpropengröße der Patientinnen", value = "2000", width = 1000, placeholder = "Stichprobengröße"),
+    numericInput("mortWoCl", "Todesfälle der Frauen", value = "300", width = 1000),
+    numericInput("stdWoCl", "Standardabweichung der Todesfälle", value = "2", width = 1000),
+    numericInput("stichWoCl", "Stichpropengröße der Patientinnen", value = "2000", width = 1000),
   ),
   )
 
@@ -66,10 +85,10 @@ server <- function(input, output,session) {
   }
   
   observeEvent(input$jahr, {
-    updateTextInput(session,'mortWCl',value = paste(getDeathsPerYear(input$jahr)[,3][1]))
-    updateTextInput(session,'mortWoCl',value = paste(getDeathsPerYear(input$jahr)[,3][2]))
-    updateTextInput(session,'stichWCl',value = paste(getDeathsPerYear(input$jahr)[,2][1]))
-    updateTextInput(session,'stichWoCl',value = paste(getDeathsPerYear(input$jahr)[,2][2]))
+    updateNumericInput(session,'mortWCl',value = paste(getDeathsPerYear(input$jahr)[,3][1]))
+    updateNumericInput(session,'mortWoCl',value = paste(getDeathsPerYear(input$jahr)[,3][2]))
+    updateNumericInput(session,'stichWCl',value = paste(getDeathsPerYear(input$jahr)[,2][1]))
+    updateNumericInput(session,'stichWoCl',value = paste(getDeathsPerYear(input$jahr)[,2][2]))
     })
   
   print(getDeathsPerYear(1847)[,2][1])
@@ -101,8 +120,9 @@ server <- function(input, output,session) {
     sliderValues()
   })
   
-  output$plot <- renderPlot({
-    z_val <- compare(input$mortWCl, input$mortWoCl, input$stdWCl**2, input$stdWoCl**2, input$StichWCl, input$stichWoCl)
+  
+  output$distPlot <- renderPlot({
+    z_val <- compare(input$mortWCl, input$mortWoCl, input$stdWCl**2, input$stdWoCl**2, input$stichWCl, input$stichWoCl)
     ##dynamische Anpassung des Plots
     #https://stackoverflow.com/questions/10543443/how-to-draw-a-standard-normal-distribution-in-r
     x <- seq(ifelse(z_val < -4, z_val-2, -4), ifelse(z_val > 4, z_val+2, 4), length=1000) 
@@ -118,7 +138,7 @@ server <- function(input, output,session) {
   
   ##dynamische Ausgabe ob NUllhypothese erfüllt ist
   output$t <- renderText({
-    ifelse(res(input$konfniv, compare(input$mortWCl, input$mortWoCl, input$stdWCl**2, input$stdWoCl**2, input$StichWCl, input$stichWoCl)), 
+    ifelse(res(input$konfniv, compare(input$mortWCl, input$mortWoCl, input$stdWCl**2, input$stdWoCl**2, input$stichWCl, input$stichWoCl)), 
            paste("Ergebnis: Nullhypothese ","<font color=\"green\"><b>", "nicht abgelehnt", "</b></font>"), 
            paste("Ergebnis: Nullhypothese ","<font color=\"#FF0000\"><b>", "abgelehnt", "</b></font>"))
   })
