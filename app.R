@@ -8,7 +8,6 @@
 
 
 library(shiny)
-library(readxl)
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
@@ -79,7 +78,7 @@ server <- function(input, output,session) {
   sliderValues <- reactive({
     data.frame(
       Name = c("Konfidenzniveau",
-               "Avg. Wartezeit normale Kasse",
+               "Sterbezahlen mit Chlorwaschungen",
                "Avg. Wartezeit Selbstbedienung",
                "Varianz normale Kasse in Minuten",
                "Varianz Selbstbedienung in Minuten",
