@@ -8,7 +8,7 @@
 
 
 library(shiny)
-
+library(dplyr)
 
 
 # Define UI for application that draws a histogram
@@ -57,9 +57,6 @@ server <- function(input, output,session) {
   
   ## Berechnung des Z-Werts
   #this returns a value that can then be used to determine whether we accept h0 or not
-  compare = function(zv1, zv2, var1, var2, n1, n2){
-    return ((zv1-zv2)/sqrt((var1/n1)+(var2/n2)));
-  }
   
   propTest = function(mortWCl, mortWoCl, stichWCl, stichWoCl,konf) {
     return(prop.test(c(mortWCl,mortWoCl),c(stichWCl,stichWoCl),alternative = "two.sided",conf.level = konf, correct = FALSE))
@@ -124,8 +121,10 @@ server <- function(input, output,session) {
   
   ##dynamische Ausgabe ob NUllhypothese erfüllt ist
   output$t <- renderText({
-    ifelse(res(input$konfniv, compare(input$mortWCl, input$mortWoCl, input$stdWCl**2, input$stdWoCl**2, input$stichWCl, input$stichWoCl)), 
-           paste("Ergebnis: Nullhypothese ","<font color=\"green\"><b>", "nicht abgelehnt", "</b></font>"), 
+    kVals <- propTest(input$mortWCl, input$mortWoCl, input$stichWCl, input$stichWoCl,input$konfniv )
+    zVal <- zValF(input$mortWCl, input$mortWoCl, input$stichWCl, input$stichWoCl)
+    ifelse(between(zVal,kVals$conf.int[1],kVals$conf.int[2]), 
+           paste("Ergebnis: Nullhypothese ","<font color=\"green\"><b>", "nicht abgelehnt", "</b></font>"),
            paste("Ergebnis: Nullhypothese ","<font color=\"#FF0000\"><b>", "abgelehnt", "</b></font>"))
   })
 }
