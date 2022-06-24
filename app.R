@@ -30,8 +30,8 @@ ui <- fluidPage(
   sidebarPanel(
     width = 3,
     h5(strong("Klinik 1")),
-    numericInput("mortWCl", "Todesfälle der Frauen", value = "300", width = 1000),
-    numericInput("stichWCl", "Stichpropengröße der Patientinnen", value = "2000", width = 1000),
+    numericInput("mortWCl", "Todesfälle der Frauen", value = "61", width = 1000),
+    numericInput("stichWCl", "Stichpropengröße der Patientinnen", value = "170", width = 1000),
   ),
   mainPanel(align = "center",
     sliderInput("konfniv", "Konfidenzniveau", min = 0, max = 1, step = .001, value = .95),
@@ -44,8 +44,8 @@ ui <- fluidPage(
   sidebarPanel(
     width = 3,
     h5(strong("Klinik 2")),
-    numericInput("mortWoCl", "Todesfälle der Frauen", value = "300", width = 1000),
-    numericInput("stichWoCl", "Stichpropengröße der Patientinnen", value = "2000", width = 1000),
+    numericInput("mortWoCl", "Todesfälle der Frauen", value = "60", width = 1000),
+    numericInput("stichWoCl", "Stichpropengröße der Patientinnen", value = "150", width = 1000),
   ),
   )
 
@@ -61,15 +61,15 @@ server <- function(input, output,session) {
     return ((zv1-zv2)/sqrt((var1/n1)+(var2/n2)));
   }
   
-  propTest = function(mortMCl, mortOCl, geburtenc1, geburtenc2,konf) {
-    return(prop.test(c(mortMCl,mortMCl),c(geburtenc1,geburtenc2),alternative = "two.sided",conf.level = konf, correct = FALSE))
+  propTest = function(mortWCl, mortWoCl, stichWCl, stichWoCl,konf) {
+    return(prop.test(c(mortWCl,mortWoCl),c(stichWCl,stichWoCl),alternative = "two.sided",conf.level = konf, correct = FALSE))
   }
   
-  zValF = function(mortMCl, mortOCl, geburtenc1, geburtenc2) {
-    pVal <- c(mortMCl/geburtenc1,mortOCl/geburtenc2)
-    props <- (mortMCl+mortOCl)/(geburtenc1+geburtenc2)
+  zValF = function(mortWCl, mortWoCl, stichWCl, stichWoCl) {
+    pVal <- c(mortWCl/stichWCl,mortWoCl/stichWoCl)
+    props <- (mortWCl+mortWoCl)/(stichWCl+stichWoCl)
     q <- 1-props
-    return((pVal[1]-pVal[2])/sqrt((p*q)/geburtenc1+(p*q)/geburtenc2))
+    return((pVal[1]-pVal[2])/sqrt((props*q)/stichWCl+(props*q)/stichWoCl))
   }
   
   conf_value = function(conflevel){
@@ -96,14 +96,13 @@ server <- function(input, output,session) {
   }
   
 
-  print(propTest(250,500,1000,5000,0.95))
   
-  observeEvent(input$jahr, {
-    updateNumericInput(session,'mortWCl',value = paste(getDataPerYear(input$jahr)[,3][1]))
-    updateNumericInput(session,'mortWoCl',value = paste(getDataPerYear(input$jahr)[,3][2]))
-    updateNumericInput(session,'stichWCl',value = paste(getDataPerYear(input$jahr)[,2][1]))
-    updateNumericInput(session,'stichWoCl',value = paste(getDataPerYear(input$jahr)[,2][2]))
-    })
+ # observeEvent(input$jahr, {
+  #  updateNumericInput(session,'mortWCl',value = paste(getDataPerYear(input$jahr)[,3][1]))
+  #  updateNumericInput(session,'mortWoCl',value = paste(getDataPerYear(input$jahr)[,3][2]))
+  #  updateNumericInput(session,'stichWCl',value = paste(getDataPerYear(input$jahr)[,2][1]))
+  #  updateNumericInput(session,'stichWoCl',value = paste(getDataPerYear(input$jahr)[,2][2]))
+  #  })
   
   
   output$distPlot <- renderPlot({
