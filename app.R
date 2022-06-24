@@ -26,7 +26,6 @@ ui <- fluidPage(
   
   br(),br(),br(),
   
-<<<<<<< HEAD
   navbarPage("Semmelweis",
     tabPanel("Interaktiver Hypothesentest",
        sidebarPanel(
@@ -56,7 +55,7 @@ ui <- fluidPage(
                        plotOutput("histPlot"),
              )         
     )
-=======
+
   sidebarPanel(
     width = 3,
     h5(strong("Mit Chlorwaschung")),
@@ -77,7 +76,7 @@ ui <- fluidPage(
     numericInput("mortWoCl", "Todesfälle der Frauen", value = "60", width = 1000),
     numericInput("stichWoCl", "Stichpropengröße der Patientinnen", value = "100", width = 1000),
   ),
->>>>>>> 433e5dbc41b92f25776bbf8325d5edeaccc20a73
+
   )
 )
   
