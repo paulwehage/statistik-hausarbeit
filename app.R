@@ -28,7 +28,7 @@ ui <- fluidPage(
   
   sidebarPanel(
     width = 3,
-    h5(strong("Klinik 1")),
+    h5(strong("Mit Chlorwaschung")),
     numericInput("mortWCl", "Todesfälle der Frauen", value = "60", width = 1000),
     numericInput("stichWCl", "Stichpropengröße der Patientinnen", value = "100", width = 1000),
   ),
@@ -42,7 +42,7 @@ ui <- fluidPage(
   ),
   sidebarPanel(
     width = 3,
-    h5(strong("Klinik 2")),
+    h5(strong("Ohne Chlorwarschung")),
     numericInput("mortWoCl", "Todesfälle der Frauen", value = "60", width = 1000),
     numericInput("stichWoCl", "Stichpropengröße der Patientinnen", value = "100", width = 1000),
   ),
