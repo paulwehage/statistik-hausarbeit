@@ -9,26 +9,7 @@
 
 library(shiny)
 
-## Berechnung des Z-Werts
-#this returns a value that can then be used to determine whether we accept h0 or not
-compare = function(zv1, zv2, var1, var2, n1, n2){
-  return ((zv1-zv2)/sqrt((var1/n1)+(var2/n2)));
-}
 
-propTest = function(mortMCl, mortOCl, geburtenc1, geburtenc2,konf) {
-  return(prop.test(c(mortMCl,mortMCl),c(geburtenc1,geburtenc2),alternative = "two.sided",conf.level = konf, correct = FALSE))
-}
-
-conf_value = function(conflevel){
-  return(qnorm(conflevel, 0, 1)); 
-}
-
-## Überprüfung der Null-Hypothese
-#function to determine conf.level result, i.e. 1.64 for 95%. and then return t/f depending on if it's gt/lt result from compare
-res = function(conflevel, compareValue){
-  tmp = conf_value(conflevel)
-  return(ifelse(tmp >= compareValue & -tmp <= compareValue, TRUE, FALSE));
-}
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
@@ -50,7 +31,6 @@ ui <- fluidPage(
     width = 3,
     h5(strong("Klinik 1")),
     numericInput("mortWCl", "Todesfälle der Frauen", value = "300", width = 1000),
-    numericInput("stdWCl", "Standardabweichung der Todesfälle", value = "3", width = 1000),
     numericInput("stichWCl", "Stichpropengröße der Patientinnen", value = "2000", width = 1000),
   ),
   mainPanel(align = "center",
@@ -65,7 +45,6 @@ ui <- fluidPage(
     width = 3,
     h5(strong("Klinik 2")),
     numericInput("mortWoCl", "Todesfälle der Frauen", value = "300", width = 1000),
-    numericInput("stdWoCl", "Standardabweichung der Todesfälle", value = "2", width = 1000),
     numericInput("stichWoCl", "Stichpropengröße der Patientinnen", value = "2000", width = 1000),
   ),
   )
@@ -75,6 +54,34 @@ ui <- fluidPage(
 
 # Define server logic required to draw a histogram
 server <- function(input, output,session) {
+  
+  ## Berechnung des Z-Werts
+  #this returns a value that can then be used to determine whether we accept h0 or not
+  compare = function(zv1, zv2, var1, var2, n1, n2){
+    return ((zv1-zv2)/sqrt((var1/n1)+(var2/n2)));
+  }
+  
+  propTest = function(mortMCl, mortOCl, geburtenc1, geburtenc2,konf) {
+    return(prop.test(c(mortMCl,mortMCl),c(geburtenc1,geburtenc2),alternative = "two.sided",conf.level = konf, correct = FALSE))
+  }
+  
+  zValF = function(mortMCl, mortOCl, geburtenc1, geburtenc2) {
+    pVal <- c(mortMCl/geburtenc1,mortOCl/geburtenc2)
+    props <- (mortMCl+mortOCl)/(geburtenc1+geburtenc2)
+    q <- 1-props
+    return((pVal[1]-pVal[2])/sqrt((p*q)/geburtenc1+(p*q)/geburtenc2))
+  }
+  
+  conf_value = function(conflevel){
+    return(qnorm(conflevel, 0, 1)); 
+  }
+  
+  ## Überprüfung der Null-Hypothese
+  #function to determine conf.level result, i.e. 1.64 for 95%. and then return t/f depending on if it's gt/lt result from compare
+  res = function(conflevel, compareValue){
+    tmp = conf_value(conflevel)
+    return(ifelse(tmp >= compareValue & -tmp <= compareValue, TRUE, FALSE));
+  }
   
   #Echte Daten von Semmelweis
   year = c(1841,1842,1843,1844,1845,1846,1847,1848,1849,1850,1851,1852,1841,1842,1843,1844,1845,1846,1847,1848,1849,1850,1851,1852)
@@ -101,9 +108,9 @@ server <- function(input, output,session) {
   
   output$distPlot <- renderPlot({
     
-    #z_val <- compare(input$mortWCl, input$mortWoCl, input$stdWCl**2, input$stdWoCl**2, input$stichWCl, input$stichWoCl)
+    #zVal <- qnorm(input$konfniv)
     kVals <- propTest(input$mortWCl, input$mortWoCl, input$stichWCl, input$stichWoCl,input$konfniv )
-    zVal <- qnorm(input$konfniv,0,1)
+    zVal <- zValF(input$mortWCl, input$mortWoCl, input$stichWCl, input$stichWoCl)
     ##dynamische Anpassung des Plots
     #https://stackoverflow.com/questions/10543443/how-to-draw-a-standard-normal-distribution-in-r
     x <- seq(-1,1, length=1000) 
@@ -123,4 +130,5 @@ server <- function(input, output,session) {
            paste("Ergebnis: Nullhypothese ","<font color=\"#FF0000\"><b>", "abgelehnt", "</b></font>"))
   })
 }
+
 shinyApp(ui = ui, server = server)
