@@ -93,12 +93,12 @@ server <- function(input, output,session) {
   
 
   
- # observeEvent(input$jahr, {
-  #  updateNumericInput(session,'mortWCl',value = paste(getDataPerYear(input$jahr)[,3][1]))
-  #  updateNumericInput(session,'mortWoCl',value = paste(getDataPerYear(input$jahr)[,3][2]))
-  #  updateNumericInput(session,'stichWCl',value = paste(getDataPerYear(input$jahr)[,2][1]))
-  #  updateNumericInput(session,'stichWoCl',value = paste(getDataPerYear(input$jahr)[,2][2]))
-  #  })
+  observeEvent(input$jahr, {
+    updateNumericInput(session,'mortWCl',value = paste(getDataPerYear(input$jahr)[,3][1]))
+    updateNumericInput(session,'mortWoCl',value = paste(getDataPerYear(input$jahr)[,3][2]))
+    updateNumericInput(session,'stichWCl',value = paste(getDataPerYear(input$jahr)[,2][1]))
+    updateNumericInput(session,'stichWoCl',value = paste(getDataPerYear(input$jahr)[,2][2]))
+    })
   
   
   output$distPlot <- renderPlot({
