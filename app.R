@@ -15,6 +15,10 @@ compare = function(zv1, zv2, var1, var2, n1, n2){
   return ((zv1-zv2)/sqrt((var1/n1)+(var2/n2)));
 }
 
+propTest = function(mortMCl, mortOCl, geburtenc1, geburtenc2,konf) {
+  return(prop.test(c(mortMCl,mortMCl),c(geburtenc1,geburtenc2),alternative = "two.sided",conf.level = konf, correct = FALSE))
+}
+
 conf_value = function(conflevel){
   return(qnorm(conflevel, 0, 1)); 
 }
@@ -55,7 +59,7 @@ ui <- fluidPage(
     width = 6,
     plotOutput("distPlot"),
     
-    sliderInput(sep="","jahr", "Echte Fallzahlen nach Jahre", min = 1841, max = 1852, step = 1, value = 1841),
+    sliderInput(sep="","jahr", "Echte Fallzahlen nach Jahre", min = 1847, max = 1852, step = 1, value = 1847),
   ),
   sidebarPanel(
     width = 3,
@@ -79,61 +83,37 @@ server <- function(input, output,session) {
   semmelDf <- data.frame(year,birhts,deaths)
   
 
-  getDeathsPerYear <- function(year) {
+  getDataPerYear <- function(year) {
     todeProJahr <- semmelDf[semmelDf['year']==year, , drop=FALSE]
     return(todeProJahr)
   }
   
+
+  print(propTest(250,500,1000,5000,0.95))
+  
   observeEvent(input$jahr, {
-    updateNumericInput(session,'mortWCl',value = paste(getDeathsPerYear(input$jahr)[,3][1]))
-    updateNumericInput(session,'mortWoCl',value = paste(getDeathsPerYear(input$jahr)[,3][2]))
-    updateNumericInput(session,'stichWCl',value = paste(getDeathsPerYear(input$jahr)[,2][1]))
-    updateNumericInput(session,'stichWoCl',value = paste(getDeathsPerYear(input$jahr)[,2][2]))
+    updateNumericInput(session,'mortWCl',value = paste(getDataPerYear(input$jahr)[,3][1]))
+    updateNumericInput(session,'mortWoCl',value = paste(getDataPerYear(input$jahr)[,3][2]))
+    updateNumericInput(session,'stichWCl',value = paste(getDataPerYear(input$jahr)[,2][1]))
+    updateNumericInput(session,'stichWoCl',value = paste(getDataPerYear(input$jahr)[,2][2]))
     })
-  
-  print(getDeathsPerYear(1847)[,2][1])
-  
-  # Reactive expression to create data frame of all input values ----
-  sliderValues <- reactive({
-    data.frame(
-      Name = c("Konfidenzniveau",
-               "Sterbezahlen mit Chlorwaschungen",
-               "Avg. Wartezeit Selbstbedienung",
-               "Varianz normale Kasse in Minuten",
-               "Varianz Selbstbedienung in Minuten",
-               "Stichprobengr????e normale Kasse",
-               "Stichprobengr????e Selbstbedienung"),
-      Value = as.character(c(input$konfniv,
-                             input$mortWCl,
-                             input$mortWoCl,
-                             input$stdWCl,
-                             input$stdWoCl,
-                             input$StichWCl,
-                             input$stichWoCl)),
-      stringsAsFactors = FALSE)
-  })
-  
-  #https://stackoverflow.com/questions/10543443/how-to-draw-a-standard-normal-distribution-in-r
-  
-  # Show the values in an HTML table ----
-  output$values <- renderTable({
-    sliderValues()
-  })
   
   
   output$distPlot <- renderPlot({
-    z_val <- compare(input$mortWCl, input$mortWoCl, input$stdWCl**2, input$stdWoCl**2, input$stichWCl, input$stichWoCl)
+    
+    #z_val <- compare(input$mortWCl, input$mortWoCl, input$stdWCl**2, input$stdWoCl**2, input$stichWCl, input$stichWoCl)
+    kVals <- propTest(input$mortWCl, input$mortWoCl, input$stichWCl, input$stichWoCl,input$konfniv )
+    zVal <- qnorm(input$konfniv,0,1)
     ##dynamische Anpassung des Plots
     #https://stackoverflow.com/questions/10543443/how-to-draw-a-standard-normal-distribution-in-r
-    x <- seq(ifelse(z_val < -4, z_val-2, -4), ifelse(z_val > 4, z_val+2, 4), length=1000) 
+    x <- seq(-1,1, length=1000) 
     y <- dnorm(x, mean=0, sd=1)
     plot(x, y, type="l", lwd=1)
     legend("topright", legend = c("Z", "Grenzen"), col = 1:2, pch = 19, bty = "o")
     #https://www.rdocumentation.org/packages/graphics/versions/3.6.2/topics/abline
-    cvalue = conf_value(input$konfniv)
-    abline(v=-cvalue, col="red", lwd=3)
-    abline(v=cvalue, col="red", lwd=3)
-    abline(v=z_val, lwd=3)
+    abline(v=kVals$conf.int[1], col="red", lwd=3)
+    abline(v=kVals$conf.int[2], col="red", lwd=3)
+    abline(v=zVal, lwd=3)
   })
   
   ##dynamische Ausgabe ob NUllhypothese erfüllt ist
