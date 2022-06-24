@@ -8,7 +8,6 @@
 
 
 library(shiny)
-library(dplyr)
 
 
 # Define UI for application that draws a histogram
@@ -30,8 +29,8 @@ ui <- fluidPage(
   sidebarPanel(
     width = 3,
     h5(strong("Klinik 1")),
-    numericInput("mortWCl", "Todesfälle der Frauen", value = "61", width = 1000),
-    numericInput("stichWCl", "Stichpropengröße der Patientinnen", value = "170", width = 1000),
+    numericInput("mortWCl", "Todesfälle der Frauen", value = "60", width = 1000),
+    numericInput("stichWCl", "Stichpropengröße der Patientinnen", value = "100", width = 1000),
   ),
   mainPanel(align = "center",
     sliderInput("konfniv", "Konfidenzniveau", min = 0, max = 1, step = .001, value = .95),
@@ -45,7 +44,7 @@ ui <- fluidPage(
     width = 3,
     h5(strong("Klinik 2")),
     numericInput("mortWoCl", "Todesfälle der Frauen", value = "60", width = 1000),
-    numericInput("stichWoCl", "Stichpropengröße der Patientinnen", value = "150", width = 1000),
+    numericInput("stichWoCl", "Stichpropengröße der Patientinnen", value = "100", width = 1000),
   ),
   )
 
@@ -123,7 +122,7 @@ server <- function(input, output,session) {
   output$t <- renderText({
     kVals <- propTest(input$mortWCl, input$mortWoCl, input$stichWCl, input$stichWoCl,input$konfniv )
     zVal <- zValF(input$mortWCl, input$mortWoCl, input$stichWCl, input$stichWoCl)
-    ifelse(between(zVal,kVals$conf.int[1],kVals$conf.int[2]), 
+    ifelse((kVals$conf.int[1] < zVal & zVal< kVals$conf.int[2]), 
            paste("Ergebnis: Nullhypothese ","<font color=\"green\"><b>", "nicht abgelehnt", "</b></font>"),
            paste("Ergebnis: Nullhypothese ","<font color=\"#FF0000\"><b>", "abgelehnt", "</b></font>"))
   })
