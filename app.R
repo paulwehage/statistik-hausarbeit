@@ -26,27 +26,39 @@ ui <- fluidPage(
   
   br(),br(),br(),
   
-  sidebarPanel(
-    width = 3,
-    h5(strong("Klinik 1")),
-    numericInput("mortWCl", "Todesfälle der Frauen", value = "60", width = 1000),
-    numericInput("stichWCl", "Stichpropengröße der Patientinnen", value = "100", width = 1000),
-  ),
-  mainPanel(align = "center",
-    sliderInput("konfniv", "Konfidenzniveau", min = 0, max = 1, step = .001, value = .95),
-    h3(htmlOutput("t")),
-    width = 6,
-    plotOutput("distPlot"),
-    
-    sliderInput(sep="","jahr", "Echte Fallzahlen nach Jahre", min = 1847, max = 1852, step = 1, value = 1847),
-  ),
-  sidebarPanel(
-    width = 3,
-    h5(strong("Klinik 2")),
-    numericInput("mortWoCl", "Todesfälle der Frauen", value = "60", width = 1000),
-    numericInput("stichWoCl", "Stichpropengröße der Patientinnen", value = "100", width = 1000),
-  ),
+  navbarPage("Semmelweis",
+    tabPanel("Interaktiver Hypothesentest",
+       sidebarPanel(
+         width = 3,
+         h5(strong("Klinik 1")),
+         numericInput("mortWCl", "Todesfälle der Frauen", value = "60", width = 1000),
+         numericInput("stichWCl", "Stichpropengröße der Patientinnen", value = "100", width = 1000),
+       ),
+       mainPanel(align = "center",
+                 sliderInput("konfniv", "Konfidenzniveau", min = 0, max = 1, step = .001, value = .95),
+                 h3(htmlOutput("t")),
+                 width = 6,
+                 plotOutput("distPlot"),
+                 
+                 sliderInput(sep="","jahr", "Echte Fallzahlen nach Jahre", min = 1847, max = 1852, step = 1, value = 1847),
+       ),
+       sidebarPanel(
+         width = 3,
+         h5(strong("Klinik 2")),
+         numericInput("mortWoCl", "Todesfälle der Frauen", value = "60", width = 1000),
+         numericInput("stichWoCl", "Stichpropengröße der Patientinnen", value = "100", width = 1000),
+       ),
+    ),
+    tabPanel("Historische Daten",
+             mainPanel(align = "center",
+                       h2("Verlauf der Sterbefälle von Müttern in der ersten und zweiten Klinik von 1843 bis 1853"),
+                       plotOutput("histPlot"),
+             )         
+    )
   )
+)
+  
+  
 
 
 
@@ -91,14 +103,13 @@ server <- function(input, output,session) {
     return(todeProJahr)
   }
   
-
   
- # observeEvent(input$jahr, {
-  #  updateNumericInput(session,'mortWCl',value = paste(getDataPerYear(input$jahr)[,3][1]))
-  #  updateNumericInput(session,'mortWoCl',value = paste(getDataPerYear(input$jahr)[,3][2]))
-  #  updateNumericInput(session,'stichWCl',value = paste(getDataPerYear(input$jahr)[,2][1]))
-  #  updateNumericInput(session,'stichWoCl',value = paste(getDataPerYear(input$jahr)[,2][2]))
-  #  })
+  observeEvent(input$jahr, {
+    updateNumericInput(session,'mortWCl',value = paste(getDataPerYear(input$jahr)[,3][1]))
+    updateNumericInput(session,'mortWoCl',value = paste(getDataPerYear(input$jahr)[,3][2]))
+    updateNumericInput(session,'stichWCl',value = paste(getDataPerYear(input$jahr)[,2][1]))
+    updateNumericInput(session,'stichWoCl',value = paste(getDataPerYear(input$jahr)[,2][2]))
+    })
   
   
   output$distPlot <- renderPlot({
@@ -116,6 +127,19 @@ server <- function(input, output,session) {
     abline(v=kVals$conf.int[1], col="red", lwd=3)
     abline(v=kVals$conf.int[2], col="red", lwd=3)
     abline(v=zVal, lwd=3)
+  })
+  
+  output$histPlot <- renderPlot({
+    year <- seq(1843,1853,1)
+    births1 <- c(3060,3157,3492,4010,3490,3556,3858,3745,4194,4471,4221)
+    births2 <- c(2739,2956,3241,3754,3306,3319,3371,3261,3395,3360,3480)
+    deaths1 <- c(274,260,241,459,176,45,103,74,75,181,94)
+    deaths2 <- c(164,68,66,105,32,43,87,54,121,192,67)
+    
+    plot(year,births1)
+    lines(year,births2)
+    lines(year,deaths1)
+    lines(year,deaths2)
   })
   
   ##dynamische Ausgabe ob NUllhypothese erfüllt ist
