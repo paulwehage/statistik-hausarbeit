@@ -25,7 +25,7 @@ ui <- fluidPage(
   
   br(),br(),br(),
   
-  navbarPage("Semmelweis",
+  navbarPage("Semmelweis ",
     tabPanel("Interaktiver Hypothesentest",
        sidebarPanel(
          width = 3,
