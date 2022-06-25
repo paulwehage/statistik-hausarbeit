@@ -12,6 +12,7 @@ library(plotly)
 # Define UI for application that draws a histogram
 ui <- fluidPage(
   
+
   # Application title
   titlePanel("Semmelweis Hypothesentest mittels Konfidenzintervallen"),
   
@@ -39,7 +40,7 @@ ui <- fluidPage(
                  width = 6,
                  plotOutput("distPlot"),
                  
-                 sliderInput(sep="","jahr", "Echte Fallzahlen nach Jahre", min = 1847, max = 1852, step = 1, value = 1847),
+                # sliderInput(sep="","jahr", "Echte Fallzahlen nach Jahre", min = 1847, max = 1852, step = 1, value = 1847),
        ),
        sidebarPanel(
          width = 3,
@@ -49,9 +50,17 @@ ui <- fluidPage(
        ),
     ),
     tabPanel("Historische Daten",
-             mainPanel(align = "center",
-                       h2("Verlauf der Sterbefälle von Müttern in der ersten und zweiten Klinik von 1843 bis 1853"),
-                       plotOutput("histPlot"),
+             mainPanel(
+               h3("Da die historischen Daten Semmelweis aufgrund der Stichprobengröße unbrauchbar sind, wurden hier nochmal die echten Daten von 1843 bis 1853 auf verschiedenen Wegen visualisiert, um den Einfluss seiner Maßnahmen nachvollziehen zu können."),
+               br(),br(),
+                       tabsetPanel(id='tabset',
+                          tabPanel("Bar-Graph Klinik 1",
+                                   br(),br(),br(),
+                                   plotlyOutput("barHistPlot")),
+                          tabPanel("Linien-Graph Vergleich",
+                                   br(),br(),br(),
+                                   plotlyOutput("lineHistPlot"))
+                        ),
              )         
     ),
   )
@@ -64,6 +73,12 @@ ui <- fluidPage(
 
 # Define server logic required to draw a histogram
 server <- function(input, output,session) {
+  
+  year <- seq(1843,1853,1)
+  births1 <- c(3060,3157,3492,4010,3490,3556,3858,3745,4194,4471,4221)
+  births2 <- c(2739,2956,3241,3754,3306,3319,3371,3261,3395,3360,3480)
+  deaths1 <- c(274,260,241,459,176,45,103,74,75,181,94)
+  deaths2 <- c(164,68,66,105,32,43,87,54,121,192,67)
   
   ## Berechnung des Z-Werts
   #this returns a value that can then be used to determine whether we accept h0 or not
@@ -91,24 +106,24 @@ server <- function(input, output,session) {
   }
   
   #Echte Daten von Semmelweis
-  year = c(1841,1842,1843,1844,1845,1846,1847,1848,1849,1850,1851,1852,1841,1842,1843,1844,1845,1846,1847,1848,1849,1850,1851,1852)
-  birhts= c(3036,3287,3060,3157,3492,4010,3490,3556,3858,3745,4194,4471,2442,2659,2739,2956,3241,3754,3306,3219,3371,3261,3395,3360)
-  deaths= c(237,518,274,260,241,459,176,45,103,74,75,181,86,202,164,68,66,105,32,43,87,54,121,192)
-  semmelDf <- data.frame(year,birhts,deaths)
+  #year = c(1841,1842,1843,1844,1845,1846,1847,1848,1849,1850,1851,1852,1841,1842,1843,1844,1845,1846,1847,1848,1849,1850,1851,1852)
+  #birhts= c(3036,3287,3060,3157,3492,4010,3490,3556,3858,3745,4194,4471,2442,2659,2739,2956,3241,3754,3306,3219,3371,3261,3395,3360)
+  #deaths= c(237,518,274,260,241,459,176,45,103,74,75,181,86,202,164,68,66,105,32,43,87,54,121,192)
+  #semmelDf <- data.frame(year,birhts,deaths)
   
 
-  getDataPerYear <- function(year) {
-    todeProJahr <- semmelDf[semmelDf['year']==year, , drop=FALSE]
-    return(todeProJahr)
-  }
+  #getDataPerYear <- function(year) {
+   # todeProJahr <- semmelDf[semmelDf['year']==year, , drop=FALSE]
+  #  return(todeProJahr)
+  #}
   
   
-  observeEvent(input$jahr, {
-    updateNumericInput(session,'mortWCl',value = paste(getDataPerYear(input$jahr)[,3][1]))
-    updateNumericInput(session,'mortWoCl',value = paste(getDataPerYear(input$jahr)[,3][2]))
-    updateNumericInput(session,'stichWCl',value = paste(getDataPerYear(input$jahr)[,2][1]))
-    updateNumericInput(session,'stichWoCl',value = paste(getDataPerYear(input$jahr)[,2][2]))
-    })
+  #observeEvent(input$jahr, {
+   # updateNumericInput(session,'mortWCl',value = paste(getDataPerYear(input$jahr)[,3][1]))
+   # updateNumericInput(session,'mortWoCl',value = paste(getDataPerYear(input$jahr)[,3][2]))
+   # updateNumericInput(session,'stichWCl',value = paste(getDataPerYear(input$jahr)[,2][1]))
+   # updateNumericInput(session,'stichWoCl',value = paste(getDataPerYear(input$jahr)[,2][2]))
+   # })
   
   
   output$distPlot <- renderPlot({
@@ -128,17 +143,30 @@ server <- function(input, output,session) {
     abline(v=zVal, lwd=3)
   })
   
-  output$histPlot <- renderPlot({
-    year <- seq(1843,1853,1)
-    births1 <- c(3060,3157,3492,4010,3490,3556,3858,3745,4194,4471,4221)
-    births2 <- c(2739,2956,3241,3754,3306,3319,3371,3261,3395,3360,3480)
-    deaths1 <- c(274,260,241,459,176,45,103,74,75,181,94)
-    deaths2 <- c(164,68,66,105,32,43,87,54,121,192,67)
+  output$barHistPlot <- renderPlotly({
     
-    plot(year,births1)
-    lines(year,births2)
-    lines(year,deaths1)
-    lines(year,deaths2)
+    data <- data.frame(year,births1,births2,deaths1,deaths2)
+    
+    fig <- plot_ly(data, x=~year,y=~deaths1,type='bar',name='Tode der Mütter Klinik 1')
+    fig <- fig %>% add_trace(y=~births1,name='Geburten Klinik 1')
+    fig <- fig %>% layout(yaxis = list(title = 'Geburten/Tode'),xaxis=list(title='Jahr'),title='Verlauf der Sterbefälle von Müttern in der ersten Klinik von 1843 bis 1853')
+  
+    fig 
+    
+  })
+  
+  output$lineHistPlot <- renderPlotly({
+    
+    data <- data.frame(year,births1,births2,deaths1,deaths2)
+    
+    fig <- plot_ly(data, x=~year,y=~deaths1,type='scatter',mode='lines',name='Tode der Mütter Klinik 1',line = list(color = 'rgb(205, 12, 24)', width = 4))
+    fig <- fig %>% add_trace(y=~deaths2,name='Tode Klinik 2',line = list(color = 'blue', width = 4))
+    fig <- fig %>% add_trace(y=~births1,name='Geburten Klinik 1',line = list(color = 'rgb(205, 12, 24)', width = 4, dash = 'dash'))
+    fig <- fig %>% add_trace(y=~births2,name='Geburten Klinik 2',line = list(color = 'blue', width = 4, dash = 'dash'))
+    fig <- fig %>% layout(yaxis = list(title = 'Geburten/Tode'),xaxis=list(title='Jahr'),title='Verlauf der Geburten und Sterbefälle von Müttern in der ersten und zweiten Klinik von 1843 bis 1853')
+    
+    fig 
+    
   })
   
   ##dynamische Ausgabe ob NUllhypothese erfüllt ist
