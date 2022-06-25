@@ -6,10 +6,9 @@
 #
 #    http://shiny.rstudio.com/
 
-
+devtools::install_github
 library(shiny)
 library(ggplot2)
-
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
