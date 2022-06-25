@@ -14,7 +14,7 @@ jobs:
       - name: Install shiny
         run: |
           install.packages(c("shiny", "rsconnect"), type = "binary")
-          install.packages("ggplot2")
+          install.packages("ggplot2",repos="https://cran.uni-muenster.de/")
         shell: Rscript {0}
       - name: Push to shiny.io
         run: |
