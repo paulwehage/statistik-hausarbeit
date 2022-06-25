@@ -11,10 +11,12 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: r-lib/actions/setup-r@master
+        with:
+          r-version: '4.1.2'
       - name: Install shiny
         run: |
           install.packages(c("shiny", "rsconnect"), type = "binary")
-          install.packages("ggplot2",repos="https://cran.uni-muenster.de/")
+          install.packages("ggplot2")
         shell: Rscript {0}
       - name: Push to shiny.io
         run: |
