@@ -13,6 +13,7 @@ jobs:
       - uses: r-lib/actions/setup-r@master
       - name: Install shiny
         run: |
+          devtools::install_github,
           install.packages(c("shiny", "rsconnect"), type = "binary")
         shell: Rscript {0}
       - name: Push to shiny.io
