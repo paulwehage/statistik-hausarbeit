@@ -8,6 +8,7 @@
 
 
 library(shiny)
+library(ggplot2)
 
 
 # Define UI for application that draws a histogram
@@ -54,7 +55,7 @@ ui <- fluidPage(
                        h2("Verlauf der Sterbefälle von Müttern in der ersten und zweiten Klinik von 1843 bis 1853"),
                        plotOutput("histPlot"),
              )         
-    )
+    ),
 
   sidebarPanel(
     width = 3,
