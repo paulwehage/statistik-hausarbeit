@@ -6,7 +6,6 @@
 #
 #    http://shiny.rstudio.com/
 
-devtools::install_github
 library(shiny)
 library(ggplot2)
 
