@@ -7,7 +7,7 @@
 #    http://shiny.rstudio.com/
 
 library(shiny)
-library(ggplot2)
+library(plotly)
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
@@ -54,28 +54,6 @@ ui <- fluidPage(
                        plotOutput("histPlot"),
              )         
     ),
-
-  sidebarPanel(
-    width = 3,
-    h5(strong("Mit Chlorwaschung")),
-    numericInput("mortWCl", "Todesfälle der Frauen", value = "60", width = 1000),
-    numericInput("stichWCl", "Stichpropengröße der Patientinnen", value = "100", width = 1000),
-  ),
-  mainPanel(align = "center",
-    sliderInput("konfniv", "Konfidenzniveau", min = 0, max = 1, step = .001, value = .95),
-    h3(htmlOutput("t")),
-    width = 6,
-    plotOutput("distPlot"),
-    
-    sliderInput(sep="","jahr", "Echte Fallzahlen nach Jahre", min = 1847, max = 1852, step = 1, value = 1847),
-  ),
-  sidebarPanel(
-    width = 3,
-    h5(strong("Ohne Chlorwarschung")),
-    numericInput("mortWoCl", "Todesfälle der Frauen", value = "60", width = 1000),
-    numericInput("stichWoCl", "Stichpropengröße der Patientinnen", value = "100", width = 1000),
-  ),
-
   )
 )
   
