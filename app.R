@@ -59,7 +59,10 @@ ui <- fluidPage(
                                    plotlyOutput("barHistPlot")),
                           tabPanel("Linien-Graph Vergleich",
                                    br(),br(),br(),
-                                   plotlyOutput("lineHistPlot"))
+                                   plotlyOutput("lineHistPlot")),
+                          tabPanel("Vor/Nach Chlorwaschung vergleich",
+                                   br(),br(),br(),
+                                   plotlyOutput("lineClPlot"))
                         ),
              )         
     ),
@@ -79,6 +82,8 @@ server <- function(input, output,session) {
   births2 <- c(2739,2956,3241,3754,3306,3319,3371,3261,3395,3360,3480)
   deaths1 <- c(274,260,241,459,176,45,103,74,75,181,94)
   deaths2 <- c(164,68,66,105,32,43,87,54,121,192,67)
+  deaths1_wOCl <- c(274,260,241,459,1760,NaN,NaN,NaN,NaN,NaN,NaN)
+  deaths1_wCl <- c(NaN,NaN,NaN,NaN,NaN,45,103,74,75,181,94)
   
   ## Berechnung des Z-Werts
   #this returns a value that can then be used to determine whether we accept h0 or not
@@ -149,7 +154,7 @@ server <- function(input, output,session) {
     
     fig <- plot_ly(data, x=~year,y=~deaths1,type='bar',name='Tode der Mütter Klinik 1')
     fig <- fig %>% add_trace(y=~births1,name='Geburten Klinik 1')
-    fig <- fig %>% layout(yaxis = list(title = 'Geburten/Tode'),xaxis=list(title='Jahr'),title='Verlauf der Sterbefälle von Müttern in der ersten Klinik von 1843 bis 1853')
+    fig <- fig %>% layout(yaxis = list(title = 'Geburten/Tode'),xaxis=list(title='Jahr',tickmode='linear'),title='Verlauf der Sterbefälle von Müttern in der ersten Klinik von 1843 bis 1853')
   
     fig 
     
@@ -163,7 +168,19 @@ server <- function(input, output,session) {
     fig <- fig %>% add_trace(y=~deaths2,name='Tode Klinik 2',line = list(color = 'blue', width = 4))
     fig <- fig %>% add_trace(y=~births1,name='Geburten Klinik 1',line = list(color = 'rgb(205, 12, 24)', width = 4, dash = 'dash'))
     fig <- fig %>% add_trace(y=~births2,name='Geburten Klinik 2',line = list(color = 'blue', width = 4, dash = 'dash'))
-    fig <- fig %>% layout(yaxis = list(title = 'Geburten/Tode'),xaxis=list(title='Jahr'),title='Verlauf der Geburten und Sterbefälle von Müttern in der ersten und zweiten Klinik von 1843 bis 1853')
+    fig <- fig %>% layout(yaxis = list(title = 'Geburten/Tode'),xaxis=list(title='Jahr',tickmode='linear'),title='Verlauf der Geburten und Sterbefälle von Müttern in der ersten und zweiten Klinik von 1843 bis 1853')
+    
+    fig 
+    
+  })
+  
+  output$lineClPlot <- renderPlotly({
+    
+    data <- data.frame(year,deaths1_wCl,deaths1_wOCl)
+    
+    fig <- plot_ly(data, x=~year,y=~deaths1_wOCl,type='scatter',mode='lines+markers' , name='Tode Klinik 1 ohne Chlorwaschung',line = list(color = 'red', width = 4))
+    fig <- fig %>% add_trace(y=~deaths1_wCl,name='Toder Klinik 1 mit Chlorwaschung',line = list(color = 'green', width = 4))
+    fig <- fig %>% layout(yaxis = list(title = 'Tode im Bezug auf Chlorwaschung'),xaxis=list(title='Jahr',tickmode='linear'),title='Verlauf Sterbefälle von Müttern in der Klinik von 1843 bis 1853')
     
     fig 
     
