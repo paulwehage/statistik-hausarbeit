@@ -18,6 +18,9 @@ ui <- fluidPage(
   
   h4("Nullhypothese: Die Chlorwaschungen als Hygienemaßnahmen sorgen für eine geringere Müttersterblichkeit"),
   
+  #:https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3807776/#:~:text=From%201840%20through%201846%2C%20the,were%20due%20to%20puerperal%20fever.
+  # https://de.wikipedia.org/wiki/Ignaz_Semmelweis
+  
   p("Ignaz Semmelweis (1818 - 1865) war ein ungarisch-österreichischer Chirurg und Geburtshelfer in der Wiener Entbindungsklinik, welche in zwei Unterkliniken unterteilt war -  in der ersten arbeiteten Studierende und Ärzte und in der zweiten nur Hebammen. Mit der Zeit fiel ihm auf, dass in der ersten Klinik weitaus mehr Mütter am Kindbettfieber nach der Entbindung starben als in der Zweiten und er führte es auf Fehler in Routine-Maßnahmen zurück. 
     Er beobachtete, dass die Mitarbeiter der ersten Klinik vor Entbindungen oftmals die Leichen der am Vortag verstorbenen Mütter obduzierten und dann ohne Hygienemaßnahmen weiter zur Entbindung gingen, wohingegen die Hebammen der zweiten Klinik keinen Kontakt zu Leichen hatten. Zwischen diesen Fakten stellte er eine Korrellation fest und das noch der Entdeckung der Rolle von Bakterien bei Krankheiten. Semmelweis Konsequenz darauf war, dass er die 
     Mitarbeiter der ersten Klinik dazu verpflichtete, vor einer Entbindung ihre Hände und das Werkzeug mit Chlorkalk zu desinfizieren. Das Ergebnis war eindeutig - von fast 10% Sterblichkeit auf 1,2%, was sogar die Hebammen schlug."),
@@ -26,7 +29,7 @@ ui <- fluidPage(
   
   br(),br(),br(),
   
-  navbarPage("Semmelweis ",
+  navbarPage("Darstellungen",
     tabPanel("Interaktiver Hypothesentest",
        sidebarPanel(
          width = 3,
@@ -79,9 +82,6 @@ server <- function(input, output,session) {
   births2 <- c(2739,2956,3241,3754,3306,3319,3371,3261,3395,3360,3480)
   deaths1 <- c(274,260,241,459,176,45,103,74,75,181,94)
   deaths2 <- c(164,68,66,105,32,43,87,54,121,192,67)
-  
-  ## Berechnung des Z-Werts
-  #this returns a value that can then be used to determine whether we accept h0 or not
   
   propTest = function(mortWCl, mortWoCl, stichWCl, stichWoCl,konf) {
     return(prop.test(c(mortWCl,mortWoCl),c(stichWCl,stichWoCl),alternative = "two.sided",conf.level = konf, correct = FALSE))
