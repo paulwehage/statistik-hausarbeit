@@ -16,7 +16,7 @@ ui <- fluidPage(
   # Application title
   titlePanel("Semmelweis Hypothesentest mittels Konfidenzintervallen"),
   
-  h4("Nullhypothese: Die Chlorwaschungen als Hygienemaßnahmen sorgen für eine geringere Müttersterblichkeit"),
+  h4("Nullhypothese: Die Chlorwaschungen als Hygienemaßnahmen sorgen nicht für eine geringere Müttersterblichkeit"),
   
   #:https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3807776/#:~:text=From%201840%20through%201846%2C%20the,were%20due%20to%20puerperal%20fever.
   # https://de.wikipedia.org/wiki/Ignaz_Semmelweis
