@@ -14,7 +14,7 @@ ui <- fluidPage(
   
 
   # Application title
-  titlePanel("Semmelweis Hypothesentest mittels Konfidenzintervallen"),
+  titlePanel("Zweiseitiger Zwei-Stichproben-Hypothesentest im Kontext von Chlorwaschungen"),
   
   h4("Nullhypothese: Die Chlorwaschungen als Hygienemaßnahmen sorgen nicht für eine geringere Müttersterblichkeit"),
   
@@ -33,7 +33,7 @@ ui <- fluidPage(
     tabPanel("Interaktiver Hypothesentest",
        sidebarPanel(
          width = 3,
-         h5(strong("Klinik 1")),
+         h5(strong("Ohne Chlorwaschung")),
          numericInput("mortWCl", "Todesfälle der Frauen", value = "60", width = 1000),
          numericInput("stichWCl", "Stichpropengröße der Patientinnen", value = "100", width = 1000),
        ),
@@ -47,7 +47,7 @@ ui <- fluidPage(
        ),
        sidebarPanel(
          width = 3,
-         h5(strong("Klinik 2")),
+         h5(strong("Nach Chlorwaschung")),
          numericInput("mortWoCl", "Todesfälle der Frauen", value = "60", width = 1000),
          numericInput("stichWoCl", "Stichpropengröße der Patientinnen", value = "100", width = 1000),
        ),
