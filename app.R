@@ -8,6 +8,7 @@
 
 library(shiny)
 library(plotly)
+library(gginference)
 
 
 # Define UI for application that draws a histogram
@@ -152,19 +153,7 @@ server <- function(input, output,session) {
     
     kVals <- propTest(input$mortWCl, input$mortWoCl, input$stichWCl, input$stichWoCl,input$konfniv )
     zVal <- zValF(input$mortWCl, input$mortWoCl, input$stichWCl, input$stichWoCl)
-    ##dynamische Anpassung des Plots
-    #https://stackoverflow.com/questions/10543443/how-to-draw-a-standard-normal-distribution-in-r
-  
-  
-    plot(1, type="n", xlab="", ylab="", xlim=c(-3, 3), ylim=c(0, 1))
-    
-    
-    legend("topright", legend = c("Z", "Grenzen"), col = 1:2, pch = 19, bty = "o",cex=0.8)
-    #https://www.rdocumentation.org/packages/graphics/versions/3.6.2/topics/abline
-    abline(v=kVals$conf.int[1], col="red", lwd=3)
-    abline(v=kVals$conf.int[2], col="red", lwd=3)
-    print(1-input$konfniv)
-    abline(v=zVal, lwd=3)
+    ggproptest(kVals)
   })
   
   
