@@ -9,6 +9,7 @@
 library(shiny)
 library(plotly)
 
+
 # Define UI for application that draws a histogram
 ui <- fluidPage(
   
@@ -36,20 +37,24 @@ ui <- fluidPage(
          h5(strong("Ohne Chlorwaschung")),
          numericInput("mortWCl", "Todesfälle der Frauen", value = "60", width = 1000),
          numericInput("stichWCl", "Stichpropengröße der Patientinnen", value = "100", width = 1000),
+         br(),br(),br(),
+         sliderInput("vorChlor", "Jahr",min=1843,max=1846,step = 1,value=1843,sep = "")
        ),
+      
        mainPanel(align = "center",
                  sliderInput("konfniv", "Konfidenzniveau", min = 0, max = 1, step = .001, value = .95),
                  h3(htmlOutput("t")),
+                 h5(htmlOutput("pValue")),
                  width = 6,
-                 plotOutput("distPlot"),
-                 
-                # sliderInput(sep="","jahr", "Echte Fallzahlen nach Jahre", min = 1847, max = 1852, step = 1, value = 1847),
+                 plotOutput("distPlot")
        ),
        sidebarPanel(
          width = 3,
          h5(strong("Nach Chlorwaschung")),
          numericInput("mortWoCl", "Todesfälle der Frauen", value = "60", width = 1000),
          numericInput("stichWoCl", "Stichpropengröße der Patientinnen", value = "100", width = 1000),
+         br(),br(),br(),
+         sliderInput("nachChlor", "Jahr",min=1843,max=1846,step = 1,value=1843,sep="")
        ),
     ),
     tabPanel("Historische Daten",
@@ -89,7 +94,13 @@ server <- function(input, output,session) {
   deaths1_wCl <- c(NaN,NaN,NaN,NaN,NaN,45,103,74,75,181,94)
   
   propTest = function(mortWCl, mortWoCl, stichWCl, stichWoCl,konf) {
-    return(prop.test(c(mortWCl,mortWoCl),c(stichWCl,stichWoCl),alternative = "two.sided",conf.level = konf, correct = FALSE))
+    return(prop.test(c(mortWCl,mortWoCl),c(stichWCl,stichWoCl),alternative = "greater",conf.level = konf, correct = FALSE))
+  }
+  
+  zValNew = function(mortWCl, mortWoCl, stichWCl, stichWoCl) {
+    pVal <- c(mortWCl/stichWCl,mortWoCl/stichWoCl)
+    props <- (mortWCl+mortWoCl)/(stichWCl+stichWoCl)
+    return((pVal[1]-pVal[2])/sqrt(props*(1-props)*(1/stichWCl+1/stichWoCl)))
   }
   
   zValF = function(mortWCl, mortWoCl, stichWCl, stichWoCl) {
@@ -99,54 +110,64 @@ server <- function(input, output,session) {
     return((pVal[1]-pVal[2])/sqrt((props*q)/stichWCl+(props*q)/stichWoCl))
   }
   
-  conf_value = function(conflevel){
-    return(qnorm(conflevel, 0, 1)); 
-  }
-  
-  ## Überprüfung der Null-Hypothese
-  #function to determine conf.level result, i.e. 1.64 for 95%. and then return t/f depending on if it's gt/lt result from compare
-  res = function(conflevel, compareValue){
-    tmp = conf_value(conflevel)
-    return(ifelse(tmp >= compareValue & -tmp <= compareValue, TRUE, FALSE));
-  }
-  
   #Echte Daten von Semmelweis
-  #year = c(1841,1842,1843,1844,1845,1846,1847,1848,1849,1850,1851,1852,1841,1842,1843,1844,1845,1846,1847,1848,1849,1850,1851,1852)
-  #birhts= c(3036,3287,3060,3157,3492,4010,3490,3556,3858,3745,4194,4471,2442,2659,2739,2956,3241,3754,3306,3219,3371,3261,3395,3360)
-  #deaths= c(237,518,274,260,241,459,176,45,103,74,75,181,86,202,164,68,66,105,32,43,87,54,121,192)
-  #semmelDf <- data.frame(year,birhts,deaths)
+  year = c(1841,1842,1843,1844,1845,1846,1847,1848,1849,1850,1851,1852,1841,1842,1843,1844,1845,1846,1847,1848,1849,1850,1851,1852)
+  birhts= c(3036,3287,3060,3157,3492,4010,3490,3556,3858,3745,4194,4471,2442,2659,2739,2956,3241,3754,3306,3219,3371,3261,3395,3360)
+  deaths= c(237,518,274,260,241,459,176,45,103,74,75,181,86,202,164,68,66,105,32,43,87,54,121,192)
+  semmelDf <- data.frame(year,birhts,deaths)
   
 
-  #getDataPerYear <- function(year) {
-   # todeProJahr <- semmelDf[semmelDf['year']==year, , drop=FALSE]
-  #  return(todeProJahr)
-  #}
+  getDataPerYear <- function(year) {
+  todeProJahr <- semmelDf[semmelDf['year']==year, , drop=FALSE]
+    return(todeProJahr)
+  }
+  #vorChlorVal <- reactive(input$vorChlor)
+  #print(vorChlorVal)
   
   
-  #observeEvent(input$jahr, {
-   # updateNumericInput(session,'mortWCl',value = paste(getDataPerYear(input$jahr)[,3][1]))
-   # updateNumericInput(session,'mortWoCl',value = paste(getDataPerYear(input$jahr)[,3][2]))
-   # updateNumericInput(session,'stichWCl',value = paste(getDataPerYear(input$jahr)[,2][1]))
-   # updateNumericInput(session,'stichWoCl',value = paste(getDataPerYear(input$jahr)[,2][2]))
+  #observeEvent(input$vorChlor, {
+  #  updateNumericInput(session,'mortWCl',value = paste(getDataPerYear(input$vorChlor)[,3][1]))
+  #  updateNumericInput(session,'stichWCl',value = paste(getDataPerYear(input$vorChlor)[,2][1]))
    # })
+  
+  #observeEvent(input$nachChlor, {
+  #  updateNumericInput(session,'mortWoCl',value = paste(getDataPerYear(input$nachChlor)[,3][2]))
+  #  updateNumericInput(session,'stichWoCl',value = paste(getDataPerYear(input$nachChlor)[,2][2]))
+ # })
+  
+  vline <- function(x = 0, color = "red") {
+    list(
+      type = "line", 
+      y0 = 0, 
+      y1 = 1, 
+      yref = "paper",
+      x0 = x, 
+      x1 = x, 
+      line = list(color = color)
+    )
+  }
   
   
   output$distPlot <- renderPlot({
     
-    #zVal <- qnorm(input$konfniv)
     kVals <- propTest(input$mortWCl, input$mortWoCl, input$stichWCl, input$stichWoCl,input$konfniv )
     zVal <- zValF(input$mortWCl, input$mortWoCl, input$stichWCl, input$stichWoCl)
     ##dynamische Anpassung des Plots
     #https://stackoverflow.com/questions/10543443/how-to-draw-a-standard-normal-distribution-in-r
-    x <- seq(-1,1, length=1000) 
-    y <- dnorm(x, mean=0, sd=1)
-    plot(x, y, type="l", lwd=1)
-    legend("topright", legend = c("Z", "Grenzen"), col = 1:2, pch = 19, bty = "o")
+  
+  
+    plot(1, type="n", xlab="", ylab="", xlim=c(-3, 3), ylim=c(0, 1))
+    
+    
+    legend("topright", legend = c("Z", "Grenzen"), col = 1:2, pch = 19, bty = "o",cex=0.8)
     #https://www.rdocumentation.org/packages/graphics/versions/3.6.2/topics/abline
     abline(v=kVals$conf.int[1], col="red", lwd=3)
     abline(v=kVals$conf.int[2], col="red", lwd=3)
+    print(1-input$konfniv)
     abline(v=zVal, lwd=3)
   })
+  
+  
   
   output$barHistPlot <- renderPlotly({
     
@@ -190,10 +211,18 @@ server <- function(input, output,session) {
   output$t <- renderText({
     kVals <- propTest(input$mortWCl, input$mortWoCl, input$stichWCl, input$stichWoCl,input$konfniv )
     zVal <- zValF(input$mortWCl, input$mortWoCl, input$stichWCl, input$stichWoCl)
-    ifelse((kVals$conf.int[1] < zVal & zVal< kVals$conf.int[2]), 
-           paste("Ergebnis: Nullhypothese ","<font color=\"green\"><b>", "nicht abgelehnt", "</b></font>"),
-           paste("Ergebnis: Nullhypothese ","<font color=\"#FF0000\"><b>", "abgelehnt", "</b></font>"))
+    ifelse((kVals$p.val <= 1-input$konfniv),
+           paste("Ergebnis: Nullhypothese ","<font color=\"#FF0000\"><b>", "abgelehnt", "</b></font>"),
+           paste("Ergebnis: Nullhypothese ","<font color=\"green\"><b>", "nicht abgelehnt", "</b></font>"))
+  })
+  
+  output$pValue <- renderText({
+    kVals <- propTest(input$mortWCl, input$mortWoCl, input$stichWCl, input$stichWoCl,input$konfniv )
+    paste("P-Value: ",kVals$p.val," </br> Signifikanzniveau: ", 1-input$konfniv)
+
   })
 }
+
+  
 
 shinyApp(ui = ui, server = server)
