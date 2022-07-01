@@ -95,7 +95,7 @@ server <- function(input, output,session) {
   deaths1_wCl <- c(NaN,NaN,NaN,NaN,NaN,45,103,74,75,181,94)
   
   propTest = function(mortWCl, mortWoCl, stichWCl, stichWoCl,konf) {
-    return(prop.test(c(mortWCl,mortWoCl),c(stichWCl,stichWoCl),alternative = "greater",conf.level = konf, correct = FALSE))
+    return(prop.test(c(mortWCl,mortWoCl),c(stichWCl,stichWoCl),alternative = "two.sided",conf.level = konf, correct = FALSE))
   }
   
   zValNew = function(mortWCl, mortWoCl, stichWCl, stichWoCl) {
@@ -148,12 +148,12 @@ server <- function(input, output,session) {
     )
   }
   
-  
+  #https://www.rdocumentation.org/packages/gginference/versions/0.1.3/topics/ggproptest
   output$distPlot <- renderPlot({
     
     kVals <- propTest(input$mortWCl, input$mortWoCl, input$stichWCl, input$stichWoCl,input$konfniv )
     zVal <- zValF(input$mortWCl, input$mortWoCl, input$stichWCl, input$stichWoCl)
-    ggproptest(kVals)
+    ggproptest(kVals,colaccept="green",colreject="red")
   })
   
   
