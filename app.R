@@ -39,7 +39,7 @@ ui <- fluidPage(
          numericInput("mortWCl", "Todesfälle der Frauen", value = "60", width = 1000),
          numericInput("stichWCl", "Stichpropengröße der Patientinnen", value = "100", width = 1000),
          br(),br(),br(),
-         sliderInput("vorChlor", "Jahr",min=1841,max=1846,step = 1,value=1841,sep = "")
+         sliderInput("vorChlor", "Jahr",min=1840,max=1846,step = 1,value=1845,sep = "")
        ),
       
        mainPanel(align = "center",
@@ -60,18 +60,19 @@ ui <- fluidPage(
     ),
     tabPanel("Historische Daten",
              mainPanel(
-               h3("Da die historischen Daten Semmelweis aufgrund der Stichprobengröße unbrauchbar sind, wurden hier nochmal die echten Daten von 1843 bis 1853 auf verschiedenen Wegen visualisiert, um den Einfluss seiner Maßnahmen nachvollziehen zu können."),
+               h3("Die historischen Daten von Semmelweis werden hier nochmal auf unterschiedliche Weise geplottet"),
                br(),br(),
                        tabsetPanel(id='tabset',
+                           tabPanel("Vor/Nach Chlorwaschung vergleich",
+                                            br(),br(),br(),
+                                            plotlyOutput("lineClPlot")),
                           tabPanel("Bar-Graph Klinik 1",
                                    br(),br(),br(),
                                    plotlyOutput("barHistPlot")),
                           tabPanel("Linien-Graph Vergleich",
                                    br(),br(),br(),
-                                   plotlyOutput("lineHistPlot")),
-                          tabPanel("Vor/Nach Chlorwaschung vergleich",
-                                   br(),br(),br(),
-                                   plotlyOutput("lineClPlot"))
+                                   plotlyOutput("lineHistPlot"))
+                          
                         ),
              )         
     ),
@@ -85,14 +86,14 @@ ui <- fluidPage(
 
 # Define server logic required to draw a histogram
 server <- function(input, output,session) {
-  
-  year <- seq(1843,1853,1)
-  births1 <- c(3060,3157,3492,4010,3490,3556,3858,3745,4194,4471,4221)
-  births2 <- c(2739,2956,3241,3754,3306,3319,3371,3261,3395,3360,3480)
-  deaths1 <- c(274,260,241,459,176,45,103,74,75,181,94)
-  deaths2 <- c(164,68,66,105,32,43,87,54,121,192,67)
-  deaths1_wOCl <- c(274,260,241,459,1760,NaN,NaN,NaN,NaN,NaN,NaN)
-  deaths1_wCl <- c(NaN,NaN,NaN,NaN,NaN,45,103,74,75,181,94)
+  #Loudon I. The Tragedy of Childbed Fever, Oxford: Oxford University Press, 1997 p.94-95
+  year <- seq(1840,1852,1)
+  births1 <- c(2889,3036,3287,3060,3157,3492,4010,3490,3556,3858,3745,4194,4471)
+  births2 <- c(2073,2442,2659,2739,2956,3241,3754,3306,3219,3371,3261,3395,3360)
+  deaths1 <- c(267,237,518,274,260,241,459,176,45,103,74,75,181)
+  deaths2 <- c(55,56,202,169,68,66,105,32,43,87,54,121,192)
+  deaths1_wOCl <- c(267,237,518,274,260,241,459,NaN,NaN,NaN,NaN,NaN,NaN)/c(2889,3036,3287,3060,3157,3492,NaN,NaN,NaN,NaN,NaN,NaN)
+  deaths1_wCl <- c(NaN,NaN,NaN,NaN,NaN,NaN,NaN,176,45,103,74,75,181)/c(NaN,NaN,NaN,NaN,NaN,NaN,NaN,3490,3556,3858,3745,4194,4471)
   
   propTest = function(mortWCl, mortWoCl, stichWCl, stichWoCl,konf) {
     return(prop.test(c(mortWCl,mortWoCl),c(stichWCl,stichWoCl),alternative = "two.sided",conf.level = konf, correct = FALSE))
@@ -112,14 +113,15 @@ server <- function(input, output,session) {
   }
   
   #Echte Daten von Semmelweis
-  year = c(1841,1842,1843,1844,1845,1846,1847,1848,1849,1850,1851,1852)
-  birhts= c(3036,3287,3060,3157,3492,4010,3490,3556,3858,3745,4194,4471)
-  deaths= c(237,518,274,260,241,459,176,45,103,74,75,181)
-  semmelDf <- data.frame(year,birhts,deaths)
+  #Loudon I. The Tragedy of Childbed Fever, Oxford: Oxford University Press, 1997 p.94-95
+  yearSlider = c(1840,1841,1842,1843,1844,1845,1846,1847,1848,1849,1850,1851,1852)
+  birhts= c(2889,3036,3287,3060,3157,3492,4010,3490,3556,3858,3745,4194,4471)
+  deaths= c(267,237,518,274,260,241,459,176,45,103,74,75,181)
+  semmelDf <- data.frame(yearSlider,birhts,deaths)
   
 
   getDataPerYear <- function(year) {
-  todeProJahr <- semmelDf[semmelDf['year']==year, , drop=FALSE]
+  todeProJahr <- semmelDf[semmelDf['yearSlider']==year, , drop=FALSE]
     return(todeProJahr)
   }
   vorChlorVal <- reactive(input$vorChlor)
@@ -151,6 +153,7 @@ server <- function(input, output,session) {
   }
   
   #https://www.rdocumentation.org/packages/gginference/versions/0.1.3/topics/ggproptest
+  #https://www.itl.nist.gov/div898/handbook/eda/section3/eda3674.htm
   output$distPlot <- renderPlot({
     
     kVals <- propTest(input$mortWCl, input$mortWoCl, input$stichWCl, input$stichWoCl,input$konfniv )
@@ -159,8 +162,17 @@ server <- function(input, output,session) {
    
   })
   
-  zVal <- zValF(input$mortWCl, input$mortWoCl, input$stichWCl, input$stichWoCl)
-  print(zVal)
+  output$lineClPlot <- renderPlotly({
+    
+    data <- data.frame(year,deaths1_wCl,deaths1_wOCl)
+    
+    fig <- plot_ly(data, x=~year,y=~deaths1_wOCl,type='scatter',mode='lines+markers' , name='Verhältnis Tode Klinik 1 ohne Chlorwaschung',line = list(color = 'red', width = 4))
+    fig <- fig %>% add_trace(y=~deaths1_wCl,name='Verhältnis Tode Klinik 1 mit Chlorwaschung',line = list(color = 'green', width = 4))
+    fig <- fig %>% layout(yaxis = list(title = 'Tode im Verhältnis Chlorwaschung'),xaxis=list(title='Jahr',tickmode='linear'),title='Verlauf Sterbefälle von Müttern in Klinik 1 von 1840 bis 1852 proportional zur Geburtenrate')
+    
+    fig 
+    
+  })
   
   output$barHistPlot <- renderPlotly({
     
@@ -168,7 +180,7 @@ server <- function(input, output,session) {
     
     fig <- plot_ly(data, x=~year,y=~deaths1,type='bar',name='Tode der Mütter Klinik 1')
     fig <- fig %>% add_trace(y=~births1,name='Geburten Klinik 1')
-    fig <- fig %>% layout(yaxis = list(title = 'Geburten/Tode'),xaxis=list(title='Jahr',tickmode='linear'),title='Verlauf der Sterbefälle von Müttern in der ersten Klinik von 1843 bis 1853')
+    fig <- fig %>% layout(yaxis = list(title = 'Geburten/Tode'),xaxis=list(title='Jahr',tickmode='linear'),title='Verlauf der Sterbefälle von Müttern in der ersten Klinik von 1840 bis 1852')
   
     fig 
     
@@ -182,23 +194,13 @@ server <- function(input, output,session) {
     fig <- fig %>% add_trace(y=~deaths2,name='Tode Klinik 2',line = list(color = 'blue', width = 4))
     fig <- fig %>% add_trace(y=~births1,name='Geburten Klinik 1',line = list(color = 'rgb(205, 12, 24)', width = 4, dash = 'dash'))
     fig <- fig %>% add_trace(y=~births2,name='Geburten Klinik 2',line = list(color = 'blue', width = 4, dash = 'dash'))
-    fig <- fig %>% layout(yaxis = list(title = 'Geburten/Tode'),xaxis=list(title='Jahr',tickmode='linear'),title='Verlauf der Geburten und Sterbefälle von Müttern in der ersten und zweiten Klinik von 1843 bis 1853')
+    fig <- fig %>% layout(yaxis = list(title = 'Geburten/Tode'),xaxis=list(title='Jahr',tickmode='linear'),title='Verlauf der Geburten und Sterbefälle von Müttern in der ersten und zweiten Klinik von 1840 bis 1852')
     
     fig 
     
   })
   
-  output$lineClPlot <- renderPlotly({
-    
-    data <- data.frame(year,deaths1_wCl,deaths1_wOCl)
-    
-    fig <- plot_ly(data, x=~year,y=~deaths1_wOCl,type='scatter',mode='lines+markers' , name='Tode Klinik 1 ohne Chlorwaschung',line = list(color = 'red', width = 4))
-    fig <- fig %>% add_trace(y=~deaths1_wCl,name='Toder Klinik 1 mit Chlorwaschung',line = list(color = 'green', width = 4))
-    fig <- fig %>% layout(yaxis = list(title = 'Tode im Bezug auf Chlorwaschung'),xaxis=list(title='Jahr',tickmode='linear'),title='Verlauf Sterbefälle von Müttern in der Klinik von 1843 bis 1853')
-    
-    fig 
-    
-  })
+ 
   
   ##dynamische Ausgabe ob NUllhypothese erfüllt ist
   output$t <- renderText({
@@ -208,6 +210,7 @@ server <- function(input, output,session) {
            paste("Ergebnis: Nullhypothese ","<font color=\"#FF0000\"><b>", "abgelehnt", "</b></font>"),
            paste("Ergebnis: Nullhypothese ","<font color=\"green\"><b>", "nicht abgelehnt", "</b></font>"))
   })
+  
   
   output$pValue <- renderText({
     kVals <- propTest(input$mortWCl, input$mortWoCl, input$stichWCl, input$stichWoCl,input$konfniv )
