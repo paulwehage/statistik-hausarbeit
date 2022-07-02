@@ -156,9 +156,11 @@ server <- function(input, output,session) {
     kVals <- propTest(input$mortWCl, input$mortWoCl, input$stichWCl, input$stichWoCl,input$konfniv )
     zVal <- zValF(input$mortWCl, input$mortWoCl, input$stichWCl, input$stichWoCl)
     ggproptest(kVals,colaccept="green",colreject="red")
+   
   })
   
-  
+  zVal <- zValF(input$mortWCl, input$mortWoCl, input$stichWCl, input$stichWoCl)
+  print(zVal)
   
   output$barHistPlot <- renderPlotly({
     
