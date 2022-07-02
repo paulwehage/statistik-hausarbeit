@@ -39,7 +39,7 @@ ui <- fluidPage(
          numericInput("mortWCl", "Todesfälle der Frauen", value = "60", width = 1000),
          numericInput("stichWCl", "Stichpropengröße der Patientinnen", value = "100", width = 1000),
          br(),br(),br(),
-         sliderInput("vorChlor", "Jahr",min=1843,max=1846,step = 1,value=1843,sep = "")
+         sliderInput("vorChlor", "Jahr",min=1841,max=1846,step = 1,value=1841,sep = "")
        ),
       
        mainPanel(align = "center",
@@ -55,7 +55,7 @@ ui <- fluidPage(
          numericInput("mortWoCl", "Todesfälle der Frauen", value = "60", width = 1000),
          numericInput("stichWoCl", "Stichpropengröße der Patientinnen", value = "100", width = 1000),
          br(),br(),br(),
-         sliderInput("nachChlor", "Jahr",min=1843,max=1846,step = 1,value=1843,sep="")
+         sliderInput("nachChlor", "Jahr",min=1847,max=1852,step = 1,value=1847,sep="")
        ),
     ),
     tabPanel("Historische Daten",
@@ -112,9 +112,9 @@ server <- function(input, output,session) {
   }
   
   #Echte Daten von Semmelweis
-  year = c(1841,1842,1843,1844,1845,1846,1847,1848,1849,1850,1851,1852,1841,1842,1843,1844,1845,1846,1847,1848,1849,1850,1851,1852)
-  birhts= c(3036,3287,3060,3157,3492,4010,3490,3556,3858,3745,4194,4471,2442,2659,2739,2956,3241,3754,3306,3219,3371,3261,3395,3360)
-  deaths= c(237,518,274,260,241,459,176,45,103,74,75,181,86,202,164,68,66,105,32,43,87,54,121,192)
+  year = c(1841,1842,1843,1844,1845,1846,1847,1848,1849,1850,1851,1852)
+  birhts= c(3036,3287,3060,3157,3492,4010,3490,3556,3858,3745,4194,4471)
+  deaths= c(237,518,274,260,241,459,176,45,103,74,75,181)
   semmelDf <- data.frame(year,birhts,deaths)
   
 
@@ -122,19 +122,21 @@ server <- function(input, output,session) {
   todeProJahr <- semmelDf[semmelDf['year']==year, , drop=FALSE]
     return(todeProJahr)
   }
-  #vorChlorVal <- reactive(input$vorChlor)
-  #print(vorChlorVal)
+  vorChlorVal <- reactive(input$vorChlor)
+  print(vorChlorVal)
   
+  nachChlorVal <- reactive(input$nachChlor)
+  print(vorChlorVal)
   
-  #observeEvent(input$vorChlor, {
-  #  updateNumericInput(session,'mortWCl',value = paste(getDataPerYear(input$vorChlor)[,3][1]))
-  #  updateNumericInput(session,'stichWCl',value = paste(getDataPerYear(input$vorChlor)[,2][1]))
-   # })
+  observeEvent(input$vorChlor, {
+    updateNumericInput(session,'mortWCl',value = paste(getDataPerYear(input$vorChlor)[,3][1]))
+    updateNumericInput(session,'stichWCl',value = paste(getDataPerYear(input$vorChlor)[,2][1]))
+    })
   
-  #observeEvent(input$nachChlor, {
-  #  updateNumericInput(session,'mortWoCl',value = paste(getDataPerYear(input$nachChlor)[,3][2]))
-  #  updateNumericInput(session,'stichWoCl',value = paste(getDataPerYear(input$nachChlor)[,2][2]))
- # })
+  observeEvent(input$nachChlor, {
+    updateNumericInput(session,'mortWoCl',value = paste(getDataPerYear(input$nachChlor)[,3][1]))
+    updateNumericInput(session,'stichWoCl',value = paste(getDataPerYear(input$nachChlor)[,2][1]))
+ })
   
   vline <- function(x = 0, color = "red") {
     list(
