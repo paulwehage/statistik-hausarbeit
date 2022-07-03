@@ -44,6 +44,7 @@ ui <- fluidPage(
       
        mainPanel(align = "center",
                  sliderInput("konfniv", "Konfidenzniveau", min = 0, max = 1, step = .001, value = .95),
+                 h5("P-Level-Approach"),
                  h3(htmlOutput("t")),
                  h5(htmlOutput("pValue")),
                  width = 6,
@@ -186,7 +187,7 @@ server <- function(input, output,session) {
   output$t <- renderText({
     kVals <- propTest(input$mortWCl, input$mortWoCl, input$stichWCl, input$stichWoCl,input$konfniv )
     ifelse((kVals$p.val <= 1-input$konfniv),
-           paste("P-Level-Approach </br> Ergebnis: Nullhypothese ","<font color=\"#FF0000\"><b>", "abgelehnt", "</b></font>"),
+           paste("Ergebnis: Nullhypothese ","<font color=\"#FF0000\"><b>", "abgelehnt", "</b></font>"),
            paste("Ergebnis: Nullhypothese ","<font color=\"green\"><b>", "nicht abgelehnt", "</b></font>"))
   })
   
