@@ -28,6 +28,8 @@ ui <- fluidPage(
     Mitarbeiter der ersten Klinik dazu verpflichtete, vor einer Entbindung ihre Hände und das Werkzeug mit Chlorkalk zu desinfizieren. Das Ergebnis war eindeutig - von fast 10% Sterblichkeit auf 1,2%, was sogar die Hebammen schlug."),
   p("Die Zahlen und Vorgehensweisen hat er in seiner Studie 'The Etiology, Concept, and Prophylaxis of Childbed Fever' akribisch dokumentiert und der Fall gilt damit heute als der erste Fall evidenzbasierter Medizin und als Musterbeispiel wissenschaftlicher Hypothesen."),
   p("Auch wenn Semmelweis sehr vorbidlich gearbeitet hat, hätte Ihm ein interaktives Interface sicherlich geholfen seine Hypothese der Chlorwaschung zu unterstüzen."),
+  p("Quellen: Loudon I. The Tragedy of Childbed Fever, Oxford: Oxford University Press, 1997 p.94-95, https://www.rdocumentation.org/packages/gginference/versions/0.1.3/topics/ggproptest,
+  https://www.itl.nist.gov/div898/handbook/eda/section3/eda3674.htm, https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3807776/#:~:text=From%201840%20through%201846%2C%20the,were%20due%20to%20puerperal%20fever., https://de.wikipedia.org/wiki/Ignaz_Semmelweis, https://moodle.htw-berlin.de/pluginfile.php/1456067/mod_resource/content/10/sto_ind_sta_ma_3b_pdf.pdf"),
   
   br(),br(),br(),
   
