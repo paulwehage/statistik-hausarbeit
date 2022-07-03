@@ -86,7 +86,16 @@ ui <- fluidPage(
 
 # Define server logic required to draw a histogram
 server <- function(input, output,session) {
+  
+  #Echte Daten von Semmelweis für den ersten Plot
   #Loudon I. The Tragedy of Childbed Fever, Oxford: Oxford University Press, 1997 p.94-95
+  yearSlider = c(1840,1841,1842,1843,1844,1845,1846,1847,1848,1849,1850,1851,1852)
+  birhts= c(2889,3036,3287,3060,3157,3492,4010,3490,3556,3858,3745,4194,4471)
+  deaths= c(267,237,518,274,260,241,459,176,45,103,74,75,181)
+  semmelDf <- data.frame(yearSlider,birhts,deaths)
+  
+  #Loudon I. The Tragedy of Childbed Fever, Oxford: Oxford University Press, 1997 p.94-95
+  #Daten für die Plots im Tab "Historische"
   year <- seq(1840,1852,1)
   births1 <- c(2889,3036,3287,3060,3157,3492,4010,3490,3556,3858,3745,4194,4471)
   births2 <- c(2073,2442,2659,2739,2956,3241,3754,3306,3219,3371,3261,3395,3360)
@@ -95,41 +104,20 @@ server <- function(input, output,session) {
   deaths1_wOCl <- c(267,237,518,274,260,241,459,NaN,NaN,NaN,NaN,NaN,NaN)/c(2889,3036,3287,3060,3157,3492,NaN,NaN,NaN,NaN,NaN,NaN)
   deaths1_wCl <- c(NaN,NaN,NaN,NaN,NaN,NaN,NaN,176,45,103,74,75,181)/c(NaN,NaN,NaN,NaN,NaN,NaN,NaN,3490,3556,3858,3745,4194,4471)
   
-  propTest = function(mortWCl, mortWoCl, stichWCl, stichWoCl,konf) {
+  #Funktion, die das Ergebnis des prop.test() zurückgibt
+  propTest <- function(mortWCl, mortWoCl, stichWCl, stichWoCl,konf) {
     return(prop.test(c(mortWCl,mortWoCl),c(stichWCl,stichWoCl),alternative = "two.sided",conf.level = konf, correct = FALSE))
   }
   
-  zValNew = function(mortWCl, mortWoCl, stichWCl, stichWoCl) {
-    pVal <- c(mortWCl/stichWCl,mortWoCl/stichWoCl)
-    props <- (mortWCl+mortWoCl)/(stichWCl+stichWoCl)
-    return((pVal[1]-pVal[2])/sqrt(props*(1-props)*(1/stichWCl+1/stichWoCl)))
-  }
   
-  zValF = function(mortWCl, mortWoCl, stichWCl, stichWoCl) {
-    pVal <- c(mortWCl/stichWCl,mortWoCl/stichWoCl)
-    props <- (mortWCl+mortWoCl)/(stichWCl+stichWoCl)
-    q <- 1-props
-    return((pVal[1]-pVal[2])/sqrt((props*q)/stichWCl+(props*q)/stichWoCl))
-  }
   
-  #Echte Daten von Semmelweis
-  #Loudon I. The Tragedy of Childbed Fever, Oxford: Oxford University Press, 1997 p.94-95
-  yearSlider = c(1840,1841,1842,1843,1844,1845,1846,1847,1848,1849,1850,1851,1852)
-  birhts= c(2889,3036,3287,3060,3157,3492,4010,3490,3556,3858,3745,4194,4471)
-  deaths= c(267,237,518,274,260,241,459,176,45,103,74,75,181)
-  semmelDf <- data.frame(yearSlider,birhts,deaths)
-  
-
+  #Funktion, um die Tode und Geburten pro Jahr aus dem Vektor herauszulesen und zurückzugeben
   getDataPerYear <- function(year) {
   todeProJahr <- semmelDf[semmelDf['yearSlider']==year, , drop=FALSE]
     return(todeProJahr)
   }
-  vorChlorVal <- reactive(input$vorChlor)
-  print(vorChlorVal)
   
-  nachChlorVal <- reactive(input$nachChlor)
-  print(vorChlorVal)
-  
+  #Beobachten der Slider und bei Änderungen wird der Wert für das jeweilige Jahr in die numeric Inputs eingetragen
   observeEvent(input$vorChlor, {
     updateNumericInput(session,'mortWCl',value = paste(getDataPerYear(input$vorChlor)[,3][1]))
     updateNumericInput(session,'stichWCl',value = paste(getDataPerYear(input$vorChlor)[,2][1]))
@@ -140,28 +128,18 @@ server <- function(input, output,session) {
     updateNumericInput(session,'stichWoCl',value = paste(getDataPerYear(input$nachChlor)[,2][1]))
  })
   
-  vline <- function(x = 0, color = "red") {
-    list(
-      type = "line", 
-      y0 = 0, 
-      y1 = 1, 
-      yref = "paper",
-      x0 = x, 
-      x1 = x, 
-      line = list(color = color)
-    )
-  }
   
   #https://www.rdocumentation.org/packages/gginference/versions/0.1.3/topics/ggproptest
   #https://www.itl.nist.gov/div898/handbook/eda/section3/eda3674.htm
+  #Haupt-Plot auf der Startseite, der mit den dynamischen Werten der Startseite eine chisquare-Verteilung, einen kritischen Wert und eine Test-Statistic visualisiert
   output$distPlot <- renderPlot({
-    
+    #prop.test() für den p.value und als Argument für ggproptest()
     kVals <- propTest(input$mortWCl, input$mortWoCl, input$stichWCl, input$stichWoCl,input$konfniv )
-    zVal <- zValF(input$mortWCl, input$mortWoCl, input$stichWCl, input$stichWoCl)
     ggproptest(kVals,colaccept="green",colreject="red")
    
   })
   
+  #Linienplot, der die Verhätnisse der Tode zu den Geburten in Klinik 1 und Klinik 2 von 1840 bis 1852 visualisiert
   output$lineClPlot <- renderPlotly({
     
     data <- data.frame(year,deaths1_wCl,deaths1_wOCl)
@@ -174,6 +152,7 @@ server <- function(input, output,session) {
     
   })
   
+  #grouped Barplot, der die Geburten und Tode der Klinik1 von 1840-1852 visualiesiert
   output$barHistPlot <- renderPlotly({
     
     data <- data.frame(year,births1,births2,deaths1,deaths2)
@@ -186,6 +165,7 @@ server <- function(input, output,session) {
     
   })
   
+  #Liniengraphen, die die Geburten sowie die Todesfälle von Klinik1 und Klinik2 über die Jahre 1840-1852 visualisieren
   output$lineHistPlot <- renderPlotly({
     
     data <- data.frame(year,births1,births2,deaths1,deaths2)
@@ -202,23 +182,19 @@ server <- function(input, output,session) {
   
  
   
-  ##dynamische Ausgabe ob NUllhypothese erfüllt ist
+  #dynamische Ausgabe ob NUllhypothese erfüllt ist
   output$t <- renderText({
     kVals <- propTest(input$mortWCl, input$mortWoCl, input$stichWCl, input$stichWoCl,input$konfniv )
-    zVal <- zValF(input$mortWCl, input$mortWoCl, input$stichWCl, input$stichWoCl)
     ifelse((kVals$p.val <= 1-input$konfniv),
-           paste("Ergebnis: Nullhypothese ","<font color=\"#FF0000\"><b>", "abgelehnt", "</b></font>"),
+           paste("P-Level-Approach </br> Ergebnis: Nullhypothese ","<font color=\"#FF0000\"><b>", "abgelehnt", "</b></font>"),
            paste("Ergebnis: Nullhypothese ","<font color=\"green\"><b>", "nicht abgelehnt", "</b></font>"))
   })
   
-  
+  #dynamische Ausgabe des P-Werts aus dem prop.test() und Signifikanznivau
   output$pValue <- renderText({
     kVals <- propTest(input$mortWCl, input$mortWoCl, input$stichWCl, input$stichWoCl,input$konfniv )
     paste("P-Value: ",kVals$p.val," </br> Signifikanzniveau: ", 1-input$konfniv)
 
   })
 }
-
-  
-
 shinyApp(ui = ui, server = server)
