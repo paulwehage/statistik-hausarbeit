@@ -16,7 +16,7 @@ ui <- fluidPage(
   
 
   # Application title
-  titlePanel("Rechtsseitiger Zwei-Stichproben-Hypothesentest im Kontext von Chlorwaschungen"),
+  titlePanel("Zwei-Stichproben-Hypothesentest im Kontext von Chlorwaschungen"),
   
   h4("Nullhypothese: Die Chlorwaschungen als Hygienemaßnahmen sorgen nicht für eine geringere Müttersterblichkeit"),
   
