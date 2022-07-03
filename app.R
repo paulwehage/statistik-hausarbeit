@@ -44,7 +44,7 @@ ui <- fluidPage(
       
        mainPanel(align = "center",
                  sliderInput("konfniv", "Konfidenzniveau", min = 0, max = 1, step = .001, value = .95),
-                 h5("P-Level-Approach"),
+                 h5("P-Value-Approach"),
                  h3(htmlOutput("t")),
                  h5(htmlOutput("pValue")),
                  width = 6,
