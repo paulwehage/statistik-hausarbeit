@@ -39,7 +39,7 @@ ui <- fluidPage(
          numericInput("mortWCl", "Todesfälle der Frauen", value = "60", width = 1000),
          numericInput("stichWCl", "Stichpropengröße der Patientinnen", value = "100", width = 1000),
          br(),br(),br(),
-         sliderInput("vorChlor", "Jahr",min=1840,max=1846,step = 1,value=1845,sep = "")
+         sliderInput("vorChlor", "Jahr in Klinik 1",min=1840,max=1846,step = 1,value=1845,sep = "")
        ),
       
        mainPanel(align = "center",
@@ -56,7 +56,7 @@ ui <- fluidPage(
          numericInput("mortWoCl", "Todesfälle der Frauen", value = "60", width = 1000),
          numericInput("stichWoCl", "Stichpropengröße der Patientinnen", value = "100", width = 1000),
          br(),br(),br(),
-         sliderInput("nachChlor", "Jahr",min=1847,max=1852,step = 1,value=1847,sep="")
+         sliderInput("nachChlor", "Jahr in Klinik 2",min=1847,max=1852,step = 1,value=1847,sep="")
        ),
     ),
     tabPanel("Historische Daten",
