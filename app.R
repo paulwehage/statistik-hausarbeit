@@ -56,7 +56,7 @@ ui <- fluidPage(
          numericInput("mortWoCl", "Todesfälle der Frauen", value = "60", width = 1000),
          numericInput("stichWoCl", "Stichpropengröße der Patientinnen", value = "100", width = 1000),
          br(),br(),br(),
-         sliderInput("nachChlor", "Jahr in Klinik 2",min=1847,max=1852,step = 1,value=1847,sep="")
+         sliderInput("nachChlor", "Jahr in Klinik 1",min=1847,max=1852,step = 1,value=1847,sep="")
        ),
     ),
     tabPanel("Historische Daten",
