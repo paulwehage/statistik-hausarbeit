@@ -16,7 +16,7 @@ ui <- fluidPage(
   
 
   # Application title
-  titlePanel("Rechtsseitiger Zwei-Stichproben-Hypothesentest im Kontext von Chlorwaschungen"),
+  titlePanel("Zwei-Stichproben-Hypothesentest im Kontext von Chlorwaschungen"),
   
   h4("Nullhypothese: Die Chlorwaschungen als Hygienemaßnahmen sorgen nicht für eine geringere Müttersterblichkeit"),
   
@@ -24,10 +24,12 @@ ui <- fluidPage(
   # https://de.wikipedia.org/wiki/Ignaz_Semmelweis
   
   p("Ignaz Semmelweis (1818 - 1865) war ein ungarisch-österreichischer Chirurg und Geburtshelfer in der Wiener Entbindungsklinik, welche in zwei Unterkliniken unterteilt war -  in der ersten arbeiteten Studierende und Ärzte und in der zweiten nur Hebammen. Mit der Zeit fiel ihm auf, dass in der ersten Klinik weitaus mehr Mütter am Kindbettfieber nach der Entbindung starben als in der Zweiten und er führte es auf Fehler in Routine-Maßnahmen zurück. 
-    Er beobachtete, dass die Mitarbeiter der ersten Klinik vor Entbindungen oftmals die Leichen der am Vortag verstorbenen Mütter obduzierten und dann ohne Hygienemaßnahmen weiter zur Entbindung gingen, wohingegen die Hebammen der zweiten Klinik keinen Kontakt zu Leichen hatten. Zwischen diesen Fakten stellte er eine Korrellation fest und das noch der Entdeckung der Rolle von Bakterien bei Krankheiten. Semmelweis Konsequenz darauf war, dass er die 
+    Er beobachtete, dass die Mitarbeiter der ersten Klinik vor Entbindungen oftmals die Leichen der am Vortag verstorbenen Mütter obduzierten und dann ohne Hygienemaßnahmen weiter zur Entbindung gingen, wohingegen die Hebammen der zweiten Klinik keinen Kontakt zu Leichen hatten. Zwischen diesen Fakten stellte er eine Korrellation fest und das noch vor der Entdeckung der Rolle von Bakterien bei Krankheiten. Semmelweis Konsequenz darauf war, dass er die 
     Mitarbeiter der ersten Klinik dazu verpflichtete, vor einer Entbindung ihre Hände und das Werkzeug mit Chlorkalk zu desinfizieren. Das Ergebnis war eindeutig - von fast 10% Sterblichkeit auf 1,2%, was sogar die Hebammen schlug."),
   p("Die Zahlen und Vorgehensweisen hat er in seiner Studie 'The Etiology, Concept, and Prophylaxis of Childbed Fever' akribisch dokumentiert und der Fall gilt damit heute als der erste Fall evidenzbasierter Medizin und als Musterbeispiel wissenschaftlicher Hypothesen."),
   p("Auch wenn Semmelweis sehr vorbidlich gearbeitet hat, hätte Ihm ein interaktives Interface sicherlich geholfen seine Hypothese der Chlorwaschung zu unterstüzen."),
+  p("Quellen: Loudon I. The Tragedy of Childbed Fever, Oxford: Oxford University Press, 1997 p.94-95, https://www.rdocumentation.org/packages/gginference/versions/0.1.3/topics/ggproptest,
+  https://www.itl.nist.gov/div898/handbook/eda/section3/eda3674.htm, https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3807776/#:~:text=From%201840%20through%201846%2C%20the,were%20due%20to%20puerperal%20fever., https://de.wikipedia.org/wiki/Ignaz_Semmelweis, https://moodle.htw-berlin.de/pluginfile.php/1456067/mod_resource/content/10/sto_ind_sta_ma_3b_pdf.pdf"),
   
   br(),br(),br(),
   
@@ -44,7 +46,7 @@ ui <- fluidPage(
       
        mainPanel(align = "center",
                  sliderInput("konfniv", "Konfidenzniveau", min = 0, max = 1, step = .001, value = .95),
-                 h5("P-Level-Approach"),
+                 h5("P-Value-Approach"),
                  h3(htmlOutput("t")),
                  h5(htmlOutput("pValue")),
                  width = 6,
